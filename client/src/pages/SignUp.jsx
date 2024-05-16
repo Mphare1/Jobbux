@@ -72,7 +72,7 @@ const handleSubmit = async (e) => {
               <Label value='Your email' />
               <TextInput
                 type='email'
-                placeholder='example@example.com'
+                placeholder='example@email.com'
                 id='email'
                 onChange={handleChange}
               />
