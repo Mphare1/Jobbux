@@ -43,29 +43,18 @@ export default function DashProfile() {
     uploadTask.on('state_changed',
       (snapshot) => {
         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setImageFileUploadingProgress(progress.toFixed(0));
+        setImageFileUploadingProgress(Math.floor(progress)); // Ensure it's a number
       },
       (error) => {
         setImageFile(null);
         setImageFileUrl(null);
-        switch (error.code) {
-          case 'storage/unauthorized':
-            setImageFileError('User does not have permission to access the object');
-            setImageFileUploadingProgress(null);
-            break;
-          case 'storage/canceled':
-            setImageFileError('User canceled the upload');
-            setImageFileUploadingProgress(null);
-            break;
-          case 'storage/unknown':
-            setImageFileError('Unknown error occurred, inspect error.serverResponse');
-            setImageFileUploadingProgress(null);
-            break;
-          default:
-            setImageFileError('Failed to upload image (max size: 2MB)');
-            setImageFileUploadingProgress(null);
-            break;
-        }
+        const errorMessages = {
+          'storage/unauthorized': 'User does not have permission to access the object',
+          'storage/canceled': 'User canceled the upload',
+          'storage/unknown': 'Unknown error occurred, inspect error.serverResponse',
+        };
+        setImageFileError(errorMessages[error.code] || 'Failed to upload image (max size: 2MB)');
+        setImageFileUploadingProgress(0);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
@@ -73,6 +62,19 @@ export default function DashProfile() {
         });
       }
     );
+  };
+
+  const progressBarStyles = {
+    root: {
+      width: '100%',
+      height: '100%',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+    },
+    path: {
+      stroke: `rgba(62, 152, 199, ${imageFileUploadingProgress / 100})`,
+    },
   };
 
   return (
@@ -93,25 +95,14 @@ export default function DashProfile() {
               value={imageFileUploadingProgress}
               text={`${imageFileUploadingProgress}%`}
               strokeWidth={5}
-              styles={{
-                root: {
-                  width: '100%',
-                  height: '100%',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                },
-                path: {
-                  stroke: `rgba(62, 152, 199, ${imageFileUploadingProgress / 100})`,
-                },
-              }}
+              styles={progressBarStyles}
             />
           )}
           <img
             src={imageFileUrl || currentUser.profilePicture}
             alt='user'
             className={`rounded-full w-full h-full object-cover border-8 border-[lightgray] ${imageFileUploadingProgress > 0 && imageFileUploadingProgress < 100 ? 'opacity-50' : ''}`}
-            />
+          />
         </div>
         {imageFileError && (
           <Alert color='failure'>{imageFileError}</Alert>
