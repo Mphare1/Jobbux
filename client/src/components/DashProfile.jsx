@@ -1,10 +1,12 @@
 import { Alert, Button, TextInput } from 'flowbite-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { app } from '../firebase';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import { updateStart, updateSuccess, updateFailure } from '../redux/user/userSlice';
+import { set } from 'mongoose';
 
 export default function DashProfile() {
   const { currentUser } = useSelector((state) => state.user);
@@ -12,13 +14,19 @@ export default function DashProfile() {
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [imageFileUploadingProgress, setImageFileUploadingProgress] = useState(0);
   const [imageFileError, setImageFileError] = useState(null);
+  const [imageFileUploading, setImageFileUploading] = useState(false);
+  const [updateUserSuccess, setUpdateUserSuccess] = useState(null);
+  const [updateUserError, setUpdateUserError] = useState(null);
+  const [formData, setFormData] = useState({}); // Fixed state initialization
   const filePickerRef = useRef();
+  const dispatch = useDispatch(); 
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) { // Check if file is larger than 2MB
         setImageFileError('File size exceeds 2MB');
+        setImageFileUploading(false);
         return;
       }
       setImageFileError(null); // Clear any previous error
@@ -34,6 +42,7 @@ export default function DashProfile() {
   }, [imageFile]);
 
   const uploadImage = async () => {
+    setImageFileUploading(true);
     setImageFileError(null); // Clear any previous error
     const storage = getStorage(app);
     const fileName = new Date().getTime() + '-' + imageFile.name;
@@ -55,13 +64,20 @@ export default function DashProfile() {
         };
         setImageFileError(errorMessages[error.code] || 'Failed to upload image (max size: 2MB)');
         setImageFileUploadingProgress(0);
+        setImageFileUploading(false);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           setImageFileUrl(downloadURL);
+          setFormData((prevFormData) => ({ ...prevFormData, profilePicture: downloadURL }));
+          setImageFileUploading(false);
         });
       }
     );
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
   const progressBarStyles = {
@@ -77,10 +93,45 @@ export default function DashProfile() {
     },
   };
 
+  const handleSubmit = async (e) => {
+    setUpdateUserError(null);
+    setUpdateUserSuccess(null);
+    e.preventDefault();
+    if (Object.keys(formData).length === 0) {
+      setUpdateUserError('Please update at least one field');
+      return;
+    }
+    dispatch(updateStart());
+    if (imageFileUploading) {
+      setUpdateUserError('Please wait for the image to finish uploading');
+      return;
+    }
+    try {
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        dispatch(updateFailure(data.message));
+        setUpdateUserError(data.message);
+      } else {
+        dispatch(updateSuccess(data));
+        setUpdateUserSuccess("Profile updated successfully");
+      }
+    } catch (error) {
+      dispatch(updateFailure(error.message));
+      setUpdateUserError(error.message);
+    }
+  };
+
   return (
     <div className='max-w-lg mx-auto p-3 w-full'>
       <h1 className='my-7 text-center font-semibold text-3xl'>Profile</h1>
-      <form className='flex flex-col gap-4'>
+      <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
         <input
           type='file'
           accept='image/*'
@@ -88,8 +139,10 @@ export default function DashProfile() {
           ref={filePickerRef}
           hidden
         />
-        <div className='relative w-32 h-32 self-center cursor-pointer shadow-md overflow-hidden rounded-full'
-          onClick={() => filePickerRef.current.click()}>
+        <div
+          className='relative w-32 h-32 self-center cursor-pointer shadow-md overflow-hidden rounded-full'
+          onClick={() => filePickerRef.current.click()}
+        >
           {imageFileUploadingProgress > 0 && imageFileUploadingProgress < 100 && (
             <CircularProgressbar
               value={imageFileUploadingProgress}
@@ -112,6 +165,7 @@ export default function DashProfile() {
           id='username'
           placeholder='Username'
           defaultValue={currentUser.username}
+          onChange={handleChange}
           className='bg-gray-100 border-gray-300 rounded-lg'
         />
         <TextInput
@@ -119,12 +173,14 @@ export default function DashProfile() {
           id='email'
           placeholder='Email'
           defaultValue={currentUser.email}
+          onChange={handleChange}
           className='bg-gray-100 border-gray-300 rounded-lg'
         />
         <TextInput
           type='password'
           id='password'
           placeholder='Password'
+          onChange={handleChange}
           className='bg-gray-100 border-gray-300 rounded-lg'
         />
         <Button type='submit' gradientDuoTone='purpleToBlue' outline>
@@ -135,6 +191,12 @@ export default function DashProfile() {
         <span className='cursor-pointer'>Delete Account</span>
         <span className='cursor-pointer'>Sign Out</span>
       </div>
+      {updateUserSuccess && (
+        <Alert color='success' className='mt-4'>{updateUserSuccess}</Alert>
+      )}
+      {updateUserError && (
+        <Alert color='failure' className='mt-4'>{updateUserError}</Alert>
+      )}
     </div>
   );
 }
