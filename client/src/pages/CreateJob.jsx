@@ -1,13 +1,10 @@
 import { Button, FileInput, Select, TextInput } from 'flowbite-react';
-import React, { useState, useEffect } from 'react';
-
+import React from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 export default function CreateJob() {
-  const [description, setDescription] = useState('');
 
-  useEffect(() => {
-    console.log('ReactQuill Component Mounted');
-  }, []);
 
   return (
     <div className='p-3 max-w-3xl mx-auto min-h-screen'>
@@ -39,6 +36,8 @@ export default function CreateJob() {
           <FileInput type='file' id='jobImage' accept='image/*' />
           <Button gradientDuoTone='purpleToBlue' size='sm' outline>Upload Image</Button>
         </div>
+        <ReactQuill theme='snow' placeholder='Job Description' className='h-72 mb-12' required/>
+        <Button type='submit' gradientDuoTone='purpleToBlue' size='lg'>Publish</Button>
       </form>
     </div>
   );
