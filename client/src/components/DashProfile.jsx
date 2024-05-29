@@ -5,6 +5,7 @@ import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/
 import { app } from '../firebase';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import { Link } from 'react-router-dom';
 import {
   updateStart, updateSuccess, updateFailure,
   deleteUserStart, deleteUserSuccess,  signoutSuccess, deleteUserFailure
@@ -12,7 +13,7 @@ import {
 import { HiOutlineExclamationCircle } from 'react-icons/hi';
 
 export default function DashProfile() {
-  const { currentUser, error } = useSelector((state) => state.user);
+  const { currentUser, error, loading } = useSelector((state) => state.user);
   const [imageFile, setImageFile] = useState(null);
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [imageFileUploadingProgress, setImageFileUploadingProgress] = useState(0);
@@ -225,9 +226,23 @@ catch(error){
           onChange={handleChange}
           className='bg-gray-100 border-gray-300 rounded-lg'
         />
-        <Button type='submit' gradientDuoTone='purpleToBlue' outline>
-          Update
+        <Button type='submit' gradientDuoTone='purpleToBlue' outline
+        disabled={loading || imageFileUploading}>
+          {loading || imageFileUploading ? 'Loading...' : 'Update Profile'}
         </Button>
+        {
+          currentUser.isAdmin && (
+            <Link to={'/create-job'}>
+            <Button
+            type='button'
+            gradientDuoTone={'redToYellow'}
+            className='w-full'
+            >
+              Create a job post
+            </Button>
+            </Link>
+          )
+        }
       </form>
       <div className='text-red-500 flex justify-between mt-4'>
         <span onClick={()=>setShowModal(true)} className='cursor-pointer'>Delete Account</span>
