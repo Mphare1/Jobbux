@@ -10,6 +10,7 @@ import Footer from './components/Footer'
 import PrivateRoute from './components/PrivateRoute'
 import OnlyAdminPrivateRoute from './components/OnlyAdminPrivateRoute'
 import CreateJob from './pages/CreateJob'
+import UpdateJob from './pages/UpdateJob'
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         </Route>  
         <Route element={<OnlyAdminPrivateRoute/>}>
         <Route path="/create-job" element={<CreateJob/>} />
+        <Route path='/update-job/:postId' element={<UpdateJob/>} />
         </Route>      
       </Routes>
       <Footer/>
