@@ -12,10 +12,12 @@ import OnlyAdminPrivateRoute from './components/OnlyAdminPrivateRoute'
 import CreateJob from './pages/CreateJob'
 import UpdateJob from './pages/UpdateJob'
 import JobPage from './pages/JobPage'
+import ScrollToTop from './components/ScrollToTop'
 
 export default function App() {
   return (
     <BrowserRouter>
+    <ScrollToTop/>
     <Header/>
       <Routes>
         <Route path="/" element={<Home />} />
