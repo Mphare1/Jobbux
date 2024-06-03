@@ -63,17 +63,17 @@ export default function Header() {
           </span>
         </Link>
       </div>
-      <form onSubmit={handleSubmit} className='hidden lg:flex items-center ml-auto'>
+      <form onSubmit={handleSubmit}>
         <TextInput
           type='text'
-          placeholder='Search for jobs'
+          placeholder='Search...'
           rightIcon={AiOutlineSearch}
           className='hidden lg:inline'
-          value={searchTerm} // Added value attribute
-          onChange={(e) => setSearchTerm(e.target.value)} // Added onChange event 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
       </form>
-      <Button className='w-12 h-10 lg:hidden' color='grey' pill>
+      <Button className='w-12 h-10 lg:hidden' color='gray' pill>
         <AiOutlineSearch />
       </Button>
       <div className='flex gap-2 md:order-2'>
