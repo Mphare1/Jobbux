@@ -5,12 +5,25 @@ import { FaMoon, FaSun } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleTheme } from '../redux/theme/themeSlice';
 import { signoutSuccess } from '../redux/user/userSlice';
+import { useEffect, useState } from 'react';
 
 export default function Header() {
   const path = useLocation().pathname;
+  const location = useLocation(); // Added location variable
   const dispatch = useDispatch();
   const { currentUser } = useSelector(state => state.user); // Corrected currentuser to currentUser
   const {theme} = useSelector((state)=> state.theme);
+  const [searchTerm, setSearchTerm] = useState(''); // Added useState hook and searchTerm variable
+  
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search); // Corrected location to location.search
+    const searchTermFromUrl = urlParams.get('searchTerm'); // Corrected searchTermFromUrl to searchTermFromUrl
+    if (searchTermFromUrl) {
+      setSearchTerm(searchTermFromUrl); // Corrected setSearchTerm to setSearchTerm
+    }
+
+  }, [location.search]); // Added useEffect hook
+
   const handleSignout = async () => {
     try{
       const res = await fetch('/api/user/signout',{
@@ -31,6 +44,13 @@ export default function Header() {
     
     }
     }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (searchTerm) {
+      window.location.href = `/search?searchTerm=${searchTerm}`; // Added window.location.href
+    }
+  }
   return (
     <Navbar className='border-b-2'>
       <div className="flex items-center">
@@ -43,12 +63,14 @@ export default function Header() {
           </span>
         </Link>
       </div>
-      <form className='hidden lg:flex items-center ml-auto'>
+      <form onSubmit={handleSubmit} className='hidden lg:flex items-center ml-auto'>
         <TextInput
           type='text'
           placeholder='Search for jobs'
           rightIcon={AiOutlineSearch}
-          className='mr-2'
+          className='hidden lg:inline'
+          value={searchTerm} // Added value attribute
+          onChange={(e) => setSearchTerm(e.target.value)} // Added onChange event 
         />
       </form>
       <Button className='w-12 h-10 lg:hidden' color='grey' pill>

@@ -13,6 +13,7 @@ import CreateJob from './pages/CreateJob'
 import UpdateJob from './pages/UpdateJob'
 import JobPage from './pages/JobPage'
 import ScrollToTop from './components/ScrollToTop'
+import Search from './pages/Search'
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/sign-in" element={<SignIn />} />
         <Route path="/sign-up" element={<SignUp />} />
+        <Route path="/search" element={<Search />} />
         <Route element={<PrivateRoute/>}>
         <Route path="/dashboard" element={<Dashboard />} />
         </Route>  
