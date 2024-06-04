@@ -12,45 +12,41 @@ export default function Header() {
   const location = useLocation(); // Added location variable
   const dispatch = useDispatch();
   const { currentUser } = useSelector(state => state.user); // Corrected currentuser to currentUser
-  const {theme} = useSelector((state)=> state.theme);
+  const { theme } = useSelector((state) => state.theme);
   const [searchTerm, setSearchTerm] = useState(''); // Added useState hook and searchTerm variable
-  
+  const [isSearchVisible, setIsSearchVisible] = useState(false); // State for toggling search input visibility
+
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search); // Corrected location to location.search
     const searchTermFromUrl = urlParams.get('searchTerm'); // Corrected searchTermFromUrl to searchTermFromUrl
     if (searchTermFromUrl) {
       setSearchTerm(searchTermFromUrl); // Corrected setSearchTerm to setSearchTerm
     }
-
   }, [location.search]); // Added useEffect hook
 
   const handleSignout = async () => {
-    try{
-      const res = await fetch('/api/user/signout',{
+    try {
+      const res = await fetch('/api/user/signout', {
         method: 'POST',
       });
       const data = await res.json();
-      if(!res.ok){
+      if (!res.ok) {
         console.log(data.message);
+      } else {
+        dispatch(signoutSuccess());
       }
-        else{
-          dispatch(signoutSuccess());
-        }
-      }
-    
-    catch(error){
+    } catch (error) {
       console.log(error.message);
-    
-    
     }
-    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (searchTerm) {
       window.location.href = `/search?searchTerm=${searchTerm}`; // Added window.location.href
     }
-  }
+  };
+
   return (
     <Navbar className='border-b-2'>
       <div className="flex items-center">
@@ -63,23 +59,22 @@ export default function Header() {
           </span>
         </Link>
       </div>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className={`flex ${isSearchVisible ? 'w-full' : 'hidden lg:inline'}`}>
         <TextInput
           type='text'
           placeholder='Search...'
           rightIcon={AiOutlineSearch}
-          className='hidden lg:inline'
+          className='flex-1'
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </form>
-      <Button className='w-12 h-10 lg:hidden' color='gray' pill>
+      <Button className='w-12 h-10 lg:hidden' color='gray' pill onClick={() => setIsSearchVisible(!isSearchVisible)}>
         <AiOutlineSearch />
       </Button>
       <div className='flex gap-2 md:order-2'>
-        <Button className='w-12 h-10 hidden sm:inline' color='gray' pill
-        onClick={()=>dispatch(toggleTheme())}>
-          {theme ===  'light' ? <FaSun/> : <FaMoon/>}
+        <Button className='w-12 h-10 hidden sm:inline' color='gray' pill onClick={() => dispatch(toggleTheme())}>
+          {theme === 'light' ? <FaSun /> : <FaMoon />}
         </Button>
         {currentUser ? (
           <Dropdown
