@@ -59,6 +59,8 @@ export default function JobPage() {
     );
   return (
     <main className='p-3 flex flex-col max-w-6xl mx-auto min-h-screen'>
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9058840129897443"
+     crossorigin="anonymous"></script>
       <h1 className='text-3xl mt-10 p-3 text-center font-serif max-w-2xl mx-auto lg:text-4xl'>
         {post && post.title}
       </h1>
