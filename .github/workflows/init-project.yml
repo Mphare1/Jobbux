@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_PREFIX: registry.cloudzilla.ai/prod-project-d222d6df3a/
+  IMAGE_PREFIX: registry.cloudzilla.ai/prod-project-aa9e593b56/
 
 jobs:
   cz-build-push:
@@ -22,7 +22,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: https://registry.cloudzilla.ai/
-          username: 'robot$prod-project-d222d6df3a+imageuser'
+          username: 'robot$prod-project-aa9e593b56+imageuser'
           password: '${{ secrets.DOCKER_PASSWORD }}'
 
       - name: downcase REPO
@@ -72,9 +72,6 @@ jobs:
         run: |
           echo "writing .env file..."
           echo "# This file is generated or updated by the cloudzilla deploy workflow" >> .env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-          echo "MONGO=${{ secrets.MONGO }}" >> .env
-          echo "VITE_FIREBASE_API_KEY=${{ secrets.VITE_FIREBASE_API_KEY }}" >> .env
           # remove duplicates keeping the items at the bottom of the file
           tac .env | awk -F'=' '!seen[$1]++' | tac > .env.tmp2 && mv .env.tmp2 .env
 
@@ -92,7 +89,7 @@ jobs:
           SECTION_K8S_API_URL: '${{ secrets.SECTION_K8S_API_URL }}'
           SECTION_API_TOKEN: '${{ secrets.SECTION_API_TOKEN }}'
           DOCKER_SERVER: 'registry.cloudzilla.ai'
-          DOCKER_USERNAME: 'robot$prod-project-d222d6df3a+imageuser'
+          DOCKER_USERNAME: 'robot$prod-project-aa9e593b56+imageuser'
           DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
           FULL_IMAGE_WITH_TAG: '${{ env.DOCKER_METADATA_OUTPUT_TAGS }}'
           POD_NAME: '${{ env.IMAGE_NAME }}'
